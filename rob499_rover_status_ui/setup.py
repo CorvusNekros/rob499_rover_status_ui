@@ -32,7 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             #test listening node for topics/nodes, needs to be confirmed working
-            'testlisten = rob499_rover_status_ui.testlisten:main',
+            'node_topic_detector = rob499_rover_status_ui.node_topic_detector:main',
        ],
     },
 )
