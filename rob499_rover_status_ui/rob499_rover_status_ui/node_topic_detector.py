@@ -8,8 +8,16 @@ from rclpy.node import Node
 from ros2node.api import get_node_names
 
 
-# We're going to publish a Float32.
-from std_msgs.msg import Float32
+# We're going to publish a NodesTopics custom message
+from rob499_rover_status_ui_interfaces.msg import NodesTopics
+
+
+
+'''
+TODO: make sure custom message is set up in dependencies 
+ Fix a minor bug where this node does not display itself as alive and instead shows  _ros2cli_dummy_to_show_node_list
+ see: get_node_list() for root of problem
+'''
 
 class ListenTest(Node):
 	def __init__(self):
@@ -19,16 +27,18 @@ class ListenTest(Node):
 
 		# Create a publisher, and assign it to a member variable.T
 		# The call takes a type, topic name, and queue size.
-		self.pub = self.create_publisher(Float32, 'nodetopiclisten', 10)
+		self.pub = self.create_publisher(NodesTopics, 'nodetopiclisten', 10)
 
 		self.publishing_period = 1 
 		self.timer = self.create_timer(self.publishing_period, self.callback)
 		self.seen_topic_list = []
 		self.seen_node_list = []
 
-	# This callback will be called	 every time the timer fires.
+	# This callback will be called every time the timer fires.
 	def callback(self):
 		
+		msg = NodesTopics()
+
 		#checks what current topic list is
 		self.current_topic_list = []
 		topic_list = get_topic_list()
@@ -36,62 +46,56 @@ class ListenTest(Node):
 			self.current_topic_list.append(info[0])
 		
 		#updates list of previously seen topics
-		for n in self.current_topic_list:
-			if self.current_topic_list in self.seen_topic_list:
+		for topic in self.current_topic_list:			
+			if topic in self.seen_topic_list:
 				pass
 			else:
-				self.seen_topic_list.append(self.current_topic_list[n])
+				self.seen_topic_list.append(topic)
 
 		#creates list of topic status for output - 2nd list instead of dictionary because of ROS msg typing
-		topic_status = []
+		self.topic_status = []
 		#compares current topics with all previously seen topics
-		for n in self.seen_topic_list:
-			if self.seen_topic_list[n] in self.current_topic_list: #true if previously seen topic is currently seen
-				topic_status.append('alive')
+		for topic in self.seen_topic_list:
+			if topic in self.current_topic_list: #true if previously seen topic is currently seen
+				self.topic_status.append('alive')
 			else:
-				topic_status.append('dead')
-
-
+				self.topic_status.append('dead')
 
 
 		#checks what current node list is
 		self.current_node_list = []
 		node_list = get_node_list()
 		for info in node_list:
-			self.current_node_list.append(info[0])
+			self.current_node_list.append(info)
 		
 		#updates list of previously seen nodes
-		for n in self.current_node_list:
-			if self.current_node_list in self.seen_node_list:
+		for node in self.current_node_list:
+			if node in self.seen_node_list:
 				pass
 			else:
-				self.seen_node_list.append(self.current_node_list[n])
+				self.seen_node_list.append(node)
 
 		#creates list of node status for output - 2nd list instead of dictionary because of ROS msg typing
-		node_status = []
+		self.node_status = []
 		#compares current nodes with all previously seen nodes
-		for n in self.seen_node_list:
-			if self.seen_node_list[n] in self.current_node_list: #true if previously seen node is currently seen
-				node_status.append('alive')
+		for node in self.seen_node_list:
+			if node in self.current_node_list: #true if previously seen node is currently seen
+				self.node_status.append('alive')
 			else:
-				node_status.append('dead')
+				self.node_status.append('dead')
 
+		# Fill in custom message fields
+		msg.topic_names = self.seen_topic_list
+		msg.topic_status = self.topic_status
+		msg.node_name = self.seen_node_list
+		msg.node_status = self.node_status
+				
+		self.pub.publish(msg)		
 
+		self.get_logger().info(f'published: {msg}')
 
-		#TODO: create .msg & publish here, need to import it and change type of publsiher 
-		'''
-		string[] topic_names
-		string[] topic_status
-		string[] node_names
-		string[] node_status
 		
 		
-		'''
-
-
-
-		self.get_logger().info(f'current topics: {self.current_topic_list}')
-		self.get_logger().info(f'current nodes: {self.current_node_list}')
 
 
 # thank you: https://robotics.stackexchange.com/questions/97965/how-to-show-topics-using-python-in-ros2
