@@ -3,6 +3,6 @@
 
 # service that returns info about a node
 #
-# nodeinfo.py
+# node_info.py
 #
 # Wyatt Boer
