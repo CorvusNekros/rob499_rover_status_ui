@@ -85,7 +85,7 @@ class ListenTest(Node):
 				self.node_status.append('dead')
 
 		# Fill in custom message fields
-		msg.topic_names = self.seen_topic_list
+		msg.topic_name = self.seen_topic_list
 		msg.topic_status = self.topic_status
 		msg.node_name = self.seen_node_list
 		msg.node_status = self.node_status
