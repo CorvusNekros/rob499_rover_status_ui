@@ -32,7 +32,7 @@ class Service(Node):
 	# This callback will be called every time that the service is called.
 	def callback(self, request, response):
     
-		response.receivetime = self.get_clock().now().to_msg()
+		response.receivetime = self.get_clock().now()
 
 		return response
 
