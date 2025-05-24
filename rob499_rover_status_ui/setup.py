@@ -34,7 +34,7 @@ setup(
             #test listening node for topics/nodes, needs to be confirmed working
             'node_topic_detector = rob499_rover_status_ui.node_topic_detector:main',
             'latency = rob499_rover_status_ui.latency:main',
-
+            'node_info = rob499_rover_status_ui.node_info:main',
        ],
     },
 )
