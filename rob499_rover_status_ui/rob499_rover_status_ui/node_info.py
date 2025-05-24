@@ -44,10 +44,13 @@ class NodeInfoService(Node):
 #not even sure if this is working correctly at all
 def get_pub_topics(node):
 	node_dummy = Node(node)
-	pub_topic_list = node_dummy.get_publisher_names_and_types_by_node('oscope','/oscope')
-	#for topics in pub_topic_list:
-	#	if topics[0] == '/'+str(node):
-	#		return topics
+	try:
+		pub_topic_list = node_dummy.get_publisher_names_and_types_by_node('oscope','/oscope')
+		for topics in pub_topic_list:
+			if topics[0] == '/'+str(node):
+				return topics
+	except NodeNameNonExistentError as e:
+        self.get_logger().info(f"Node not found: {e}")
 	return pub_topic_list
 
 def get_sub_topics(node):
