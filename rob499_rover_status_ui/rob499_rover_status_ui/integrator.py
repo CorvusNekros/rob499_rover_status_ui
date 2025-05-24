@@ -13,16 +13,37 @@
 import rclpy
 from rclpy.node import Node
 
+
+
+
+# We're subscribed to a NodesTopics custom message
+from rob499_rover_status_ui_interfaces.msg import NodesTopics
+
+# Our custom services
+from rob499_rover_status_ui_interfaces.srv import NodeInfo
+from rob499_rover_status_ui_interfaces.srv import LatencySize
+
+
+
 class Integrator(Node):
 	def __init__(self):
 		# Initialize the superclass.
 		super().__init__('integrator')
 
+		# Create the subscriber.
+		self.node_topic_status = self.create_subscription(NodesTopics, 'nodetopiclisten', self.node_topic_callback, 10)
 
-	# This callback will be called every time that the service is called.
-	def callback():
-    
-		return response
+
+	# This callback will be called every time that the nodetopiclisten topic is published to.
+	def node_topic_callback(self, msg):
+		
+		#data we get from our callback
+		msg.topic_name 
+		msg.topic_status 
+		msg.node_name 
+		msg.node_status  
+
+		return 
 
 
 # This is the entry point for the node.
