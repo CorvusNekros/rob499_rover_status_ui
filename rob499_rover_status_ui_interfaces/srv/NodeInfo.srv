@@ -1,0 +1,6 @@
+string node
+---
+string[] pub_topics
+string[] sub_topics
+string[] parameters
+string[] services
