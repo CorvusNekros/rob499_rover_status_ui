@@ -31,7 +31,7 @@ class NodeInfoService(Node):
 
 		self.node = 'oscope'
 
-		response.pub_topics =get_pub_topics(self.node)
+		response.pub_topics = self.get_pub_topics()
 		response.sub_topics = "ERROR! test value, this should not appear if the code works"#get_sub_topics(self.node)
 		response.parameters = "ERROR! test value, this should not appear if the code works"
 		response.services = "ERROR! test value, this should not appear if the code works"
@@ -40,25 +40,22 @@ class NodeInfoService(Node):
 
 		return response
 
-# I dont know if this works when multiple topics are published from one node, also i dont think the data type is correct for the response
-#not even sure if this is working correctly at all
-def get_pub_topics(node):
-	node_dummy = Node(node)
-	try:
-		pub_topic_list = node_dummy.get_publisher_names_and_types_by_node('oscope','/oscope')
-		for topics in pub_topic_list:
+	# I dont know if this works when multiple topics are published from one node, also i dont think the data type is correct for the response
+	#not even sure if this is working correctly at all
+	def get_pub_topics(self):
+		pub_topic_list = self.get_publisher_names_and_types_by_node('oscope','/')
+		#for topics in pub_topic_list:
+		#	if topics[0] == '/'+str(node):
+		#		return topics
+
+		return pub_topic_list
+
+	def get_sub_topics(self):
+		node_dummy = Node(node)
+		sub_topic_list = node_dummy.get_subscriber_names_and_types_by_node('oscope','/')
+		for topics in sub_topic_list:
 			if topics[0] == '/'+str(node):
 				return topics
-	except NodeNameNonExistentError as e:
-        self.get_logger().info(f"Node not found: {e}")
-	return pub_topic_list
-
-def get_sub_topics(node):
-	node_dummy = Node(node)
-	sub_topic_list = node_dummy.get_subscriber_names_and_types_by_node('oscope','/oscope')
-	for topics in sub_topic_list:
-		if topics[0] == '/'+str(node):
-			return topics
 
 # The idiom in ROS2 is to use a function to do all of the setup and work.  This
 # function is referenced in the setup.py file as the entry point of the node when
