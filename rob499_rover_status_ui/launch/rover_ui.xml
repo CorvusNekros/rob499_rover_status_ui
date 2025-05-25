@@ -1,0 +1,6 @@
+<launch>
+    <node pkg="rob499_rover_status_ui" exec="latency" name="latency"/>
+    <node pkg="rob499_rover_status_ui" exec="node_info" name="node_info"/>
+    <node pkg="rob499_rover_status_ui" exec="node_topic_detector" name="node_topic_detector"/>
+    <node pkg="rob499_rover_status_ui" exec="integrator" name="integrator"/>
+</launch>

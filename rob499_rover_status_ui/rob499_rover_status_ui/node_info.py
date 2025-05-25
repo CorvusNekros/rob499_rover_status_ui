@@ -27,14 +27,13 @@ class NodeInfoService(Node):
 	# This callback will be called every time that the service is called.
 	def callback(self, request, response):
 		
-		self.node = request.node
+		self.nodename = request.node
 
-		self.node = 'oscope'
+
 
 		response.pub_topics = self.get_pub_topics()
-		response.sub_topics = "ERROR! test value, this should not appear if the code works"#get_sub_topics(self.node)
-		response.parameters = "ERROR! test value, this should not appear if the code works"
-		response.services = "ERROR! test value, this should not appear if the code works"
+		response.sub_topics = self.get_sub_topics()
+		response.services = self.get_services()
 
 		self.get_logger().info(f'responded with: {response}')
 
@@ -43,20 +42,30 @@ class NodeInfoService(Node):
 	# I dont know if this works when multiple topics are published from one node, also i dont think the data type is correct for the response
 	#not even sure if this is working correctly at all
 	def get_pub_topics(self):
-		pub_topic_list = self.get_publisher_names_and_types_by_node('oscope','/')
-		#for topics in pub_topic_list:
-		#	if topics[0] == '/'+str(node):
-		#		return topics
+		output_list = []
+		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,'/')
+		for topics in pub_topic_list:
+			if topics[0] == '/'+str(self.nodename):
+				output_list.append(topics[0])
+		return output_list
 
-		return pub_topic_list
+		
 
 	def get_sub_topics(self):
-		node_dummy = Node(node)
-		sub_topic_list = node_dummy.get_subscriber_names_and_types_by_node('oscope','/')
+		output_list = []
+		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,'/')
 		for topics in sub_topic_list:
-			if topics[0] == '/'+str(node):
-				return topics
-
+			if topics[0] == '/'+str(self.nodename):
+				output_list.append(topics[0])
+		return output_list
+		
+	def get_services(self):
+		output_list = []
+		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,'/')
+		for topics in sub_service_list:
+			if topics[0] == '/'+str(self.nodename):
+				output_list.append(topics[0])
+		return output_list
 # The idiom in ROS2 is to use a function to do all of the setup and work.  This
 # function is referenced in the setup.py file as the entry point of the node when
 # we're running the node with ros2 run.  The function should have one argument, for
