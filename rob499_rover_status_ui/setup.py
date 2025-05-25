@@ -35,6 +35,7 @@ setup(
             'node_topic_detector = rob499_rover_status_ui.node_topic_detector:main',
             'latency = rob499_rover_status_ui.latency:main',
             'node_info = rob499_rover_status_ui.node_info:main',
+			'node_log = rob499_rover_status_ui.node_logs:main',
        ],
     },
 )

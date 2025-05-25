@@ -39,9 +39,10 @@ find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NodesTopics.msg"
+  "msg/FilteredLog.msg"
   "srv/LatencySize.srv"
   "srv/NodeInfo.srv"
- 
+  "srv/NodeLog.srv"
 )
 ament_package()
 
