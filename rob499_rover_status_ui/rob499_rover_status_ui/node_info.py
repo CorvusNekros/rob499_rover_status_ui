@@ -24,12 +24,24 @@ class NodeInfoService(Node):
 		# Create a service, with a type, name, and callback.
 		self.service = self.create_service(NodeInfo, 'node_info', self.callback)
 
+		#List of default topics to ignore:
+		self.pub_ignore = ["/parameter_events","/rosout"]
+		self.sub_ignore = []
+		#List of default service types to ignore:
+		self.service_ignore = ["rcl_interfaces/srv/DescribeParameters",
+							   "rcl_interfaces/srv/GetParameterTypes",
+							   "rcl_interfaces/srv/GetParameters",
+							   "rcl_interfaces/srv/ListParameters",
+							   "rcl_interfaces/srv/SetParameters",
+							   "rcl_interfaces/srv/SetParametersAtomically",
+							   "type_description_interfaces/srv/GetTypeDescription"]
+
 	# This callback will be called every time that the service is called.
 	def callback(self, request, response):
 		
+		#Resquested nodename and namespace:
 		self.nodename = request.node
-
-
+		self.namespace = "/" # request.namespace
 
 		response.pub_topics = self.get_pub_topics()
 		response.sub_topics = self.get_sub_topics()
@@ -44,28 +56,28 @@ class NodeInfoService(Node):
 	def get_pub_topics(self):
 		output_list = []
 		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,'/')
-		for topics in pub_topic_list:
-			if topics[0] == '/'+str(self.nodename):
-				output_list.append(topics[0])
+		for topic in pub_topic_list:
+			if topic[0] not in self.pub_ignore:
+				output_list.append(topic[0])
 		return output_list
-
-		
 
 	def get_sub_topics(self):
 		output_list = []
 		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,'/')
-		for topics in sub_topic_list:
-			if topics[0] == '/'+str(self.nodename):
-				output_list.append(topics[0])
+		for topic in sub_topic_list:
+			if topic[0] not in self.sub_ignore:
+				output_list.append(topic[0])
 		return output_list
 		
 	def get_services(self):
 		output_list = []
 		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,'/')
-		for topics in sub_service_list:
-			if topics[0] == '/'+str(self.nodename):
-				output_list.append(topics[0])
+		for service in sub_service_list:
+			self.get_logger().info(f"service type: {service[1]}")
+			if service[1][0] not in self.service_ignore:
+				output_list.append(service[0])
 		return output_list
+
 # The idiom in ROS2 is to use a function to do all of the setup and work.  This
 # function is referenced in the setup.py file as the entry point of the node when
 # we're running the node with ros2 run.  The function should have one argument, for

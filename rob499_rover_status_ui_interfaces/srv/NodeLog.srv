@@ -1,6 +1,6 @@
 #Request
 bool enable
-int32 hz
+float32 hz
 string node
 ---
 #Response

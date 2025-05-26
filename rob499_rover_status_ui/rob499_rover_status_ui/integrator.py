@@ -33,8 +33,10 @@ class Integrator(Node):
 		# Create the subscriber.
 		self.node_topic_status = self.create_subscription(NodesTopics, 'nodetopiclisten', self.node_topic_callback, 10)
 
+		#Subscribe to both /nodetopiclisten and /log_filt
 
 	# This callback will be called every time that the nodetopiclisten topic is published to.
+	# Just updates the class lists:
 	def node_topic_callback(self, msg):
 		
 		#data we get from our callback
@@ -45,6 +47,8 @@ class Integrator(Node):
 
 		return 
 
+	#This callback is called every time a new node_log message is published. 
+	def node_log_callback
 
 # This is the entry point for the node.
 def main(args=None):
@@ -54,8 +58,12 @@ def main(args=None):
 	# The ROS2 idiom is to encapsulate everything in a class derived from Node.
 	integrate = Integrator()
 
-	# Spin with the node, and explicily call shutdown() when we're done.
-	rclpy.spin(integrate)
+	#TODO: While loop with table stuff here:
+
+		#Spin once each loop iteratoion
+
+	#Construct/Update tables:
+
 	rclpy.shutdown()
 
 

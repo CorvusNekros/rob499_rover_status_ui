@@ -29,8 +29,11 @@ class ListenTest(Node):
 		# The call takes a type, topic name, and queue size.
 		self.pub = self.create_publisher(NodesTopics, 'nodetopiclisten', 10)
 
+		#Create a timer for the publisher.
 		self.publishing_period = 1 
 		self.timer = self.create_timer(self.publishing_period, self.callback)
+		
+		#Maintain these data structures for nodes/topics seen, so we can register what's alive/dead:
 		self.seen_topic_list = []
 		self.seen_node_list = []
 
@@ -41,8 +44,8 @@ class ListenTest(Node):
 
 		#checks what current topic list is
 		self.current_topic_list = []
-		topic_list = get_topic_list()
-		for info in topic_list:
+		topic_list = self.get_topic_names_and_types()
+		for info in topic_list: #May want to filter this somehow?
 			self.current_topic_list.append(info[0])
 		
 		#updates list of previously seen topics
@@ -57,16 +60,16 @@ class ListenTest(Node):
 		#compares current topics with all previously seen topics
 		for topic in self.seen_topic_list:
 			if topic in self.current_topic_list: #true if previously seen topic is currently seen
-				self.topic_status.append('alive')
+				self.topic_status.append('Active')
 			else:
-				self.topic_status.append('dead')
-
+				self.topic_status.append('Inactive')
 
 		#checks what current node list is
 		self.current_node_list = []
-		node_list = get_node_list()
+		node_list = self.get_node_names()
 		for info in node_list:
-			self.current_node_list.append(info)
+			if not info[0].startswith('_'): #Filters out ros daemon/cli, doesn't filter out rqt
+				self.current_node_list.append(info)
 		
 		#updates list of previously seen nodes
 		for node in self.current_node_list:
@@ -80,9 +83,9 @@ class ListenTest(Node):
 		#compares current nodes with all previously seen nodes
 		for node in self.seen_node_list:
 			if node in self.current_node_list: #true if previously seen node is currently seen
-				self.node_status.append('alive')
+				self.node_status.append('Alive')
 			else:
-				self.node_status.append('dead')
+				self.node_status.append('Dead')
 
 		# Fill in custom message fields
 		msg.topic_name = self.seen_topic_list
@@ -93,23 +96,6 @@ class ListenTest(Node):
 		self.pub.publish(msg)		
 
 		self.get_logger().info(f'published: {msg}')
-
-		
-		
-
-
-# thank you: https://robotics.stackexchange.com/questions/97965/how-to-show-topics-using-python-in-ros2
-def get_topic_list():
-	node_dummy = Node("_ros2cli_dummy_to_show_topic_list")
-	topic_list = node_dummy.get_topic_names_and_types()
-	node_dummy.destroy_node()
-	return topic_list
-
-def get_node_list():
-	node_dummy = Node("_ros2cli_dummy_to_show_node_list")
-	node_list = node_dummy.get_node_names()
-	node_dummy.destroy_node()
-	return node_list
 
 # The idiom in ROS2 is to use a function to do all of the setup and work.  This
 # function is referenced in the setup.py file as the entry point of the node when
