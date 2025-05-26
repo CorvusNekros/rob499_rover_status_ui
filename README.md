@@ -14,4 +14,7 @@ We have included one of our previous homework assignments to view with the UI, i
 
 
 How to select node for detailed view:  
+>  
 
+
+Note: when viewing node details, if the subscribers/publishers/services change after the node selection service call is ran, the details will not update until the service call for the node is ran again  
