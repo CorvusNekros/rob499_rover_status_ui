@@ -1,20 +1,31 @@
-# rob499_rover_status_ui  
+# Rover Status Node for ROB499 Class Project
 
+This repository contains a set of nodes designed to general & specific monitoring of ROS2 systems on the DAM Robotics Rover teams' robot. It was to fulfill the final assignment of ROB499 by Wyatt Boer and Osian Leahy.
 
-Instructions:
+Midterm Checkin Grading Instructions:
+1. Clone the code from this repository and checkout the appropriate branch. A branch titled "midterm-checkin"has been created for the initial assignment.
+2. insure that the "rich" python package is installed. it is available from apt with the following:
+> sudo apt install python3-rich
 
-Once packages have been built and sourced, the Status UI tool can simply be run with:
+3. Build the package in a ros2 workspace.
 
->ros2 launch rob499_rover_status_ui rover_ui.py
+4. To test the midterm checkin functionality. Launch the following in ros:
 
+> ros2 launch rob499_rover_status_ui Demo_rover_ui.launch.py
 
-We have included one of our previous homework assignments to view with the UI, it can be launched with:
+In another terminal to run the actual UI run:  
 
->HW LAUNCH COMMAND GOES HERE, ALSO INCLUDE THE HOMEWORK ASSIGNMENT
+>ros2 run rob499_rover_status_ui integrator --ros-args --disable-stdout-logs  
 
+This will show 3 tables containing node statuses, node communications, and simplified node log info
 
-How to select node for detailed view:  
->  
+5. To confirm that the node statuses are being displayed properly, start any other ros2 node via ros run, and kill/restart it to confirm that it marks the node as alive or dead correctly.
 
+6. To view and confirm that the node communications and log infoare being identified correctly, run the following parameter change to select a node to view (oscope and limiter nodes are being run as part of the Demo launch file):
+> ros2 param set /integrator node_select "<NAME OF NODE>"
 
-Note: when viewing node details, if the subscribers/publishers/services change after the node selection service call is ran, the details will not update until the service call for the node is ran again  
+7. Switch this parameter between multiple nodes to confirm functionality
+
+Note: When viewing node details, if the subscribers/publishers/services change after the node selection service call is ran, the details will not update until the service call for the node is ran again
+
+Note: Node logs info is rate limited to 1hz by default (modifiable via a service call), but any log messages stronger than info level are passe through.
