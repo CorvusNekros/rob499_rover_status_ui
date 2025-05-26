@@ -3,7 +3,7 @@
 
 Instructions:
 
-Once packages have been built and sourced, the Status UI tool can be run with:
+Once packages have been built and sourced, the Status UI tool info nodes can be run with:
 
 >ros2 launch rob499_rover_status_ui rover_ui.xml
 
