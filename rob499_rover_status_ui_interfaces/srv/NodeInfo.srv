@@ -1,4 +1,5 @@
 string node
+string namespace
 ---
 string[] pub_topics
 string[] sub_topics
