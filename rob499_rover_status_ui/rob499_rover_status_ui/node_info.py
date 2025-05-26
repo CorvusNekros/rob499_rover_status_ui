@@ -26,7 +26,7 @@ class NodeInfoService(Node):
 
 		#List of default topics to ignore:
 		self.pub_ignore = ["/parameter_events","/rosout"]
-		self.sub_ignore = []
+		self.sub_ignore = ["/parameter_events"]
 		#List of default service types to ignore:
 		self.service_ignore = ["rcl_interfaces/srv/DescribeParameters",
 							   "rcl_interfaces/srv/GetParameterTypes",
@@ -41,7 +41,7 @@ class NodeInfoService(Node):
 		
 		#Requested nodename and namespace:
 		self.nodename = request.node
-		self.namespace = request.namespace
+		self.namespace = '/' #request.namespace
 
 		# fills in response data with respective functions
 		response.pub_topics = self.get_pub_topics()
@@ -55,7 +55,7 @@ class NodeInfoService(Node):
 	# returns a list of the topics being published by selected node
 	def get_pub_topics(self):
 		output_list = []
-		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,'self.namespace')
+		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,self.namespace)
 		for topic in pub_topic_list:
 			if topic[0] not in self.pub_ignore:
 				output_list.append(topic[0])
@@ -63,7 +63,7 @@ class NodeInfoService(Node):
 	# returns a list of the topics being subscribed to by selected node
 	def get_sub_topics(self):
 		output_list = []
-		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,'self.namespace')
+		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,self.namespace)
 		for topic in sub_topic_list:
 			if topic[0] not in self.sub_ignore:
 				output_list.append(topic[0])
@@ -71,7 +71,7 @@ class NodeInfoService(Node):
 	# returns a list of the service server topics for selected node
 	def get_services(self):
 		output_list = []
-		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,'self.namespace')
+		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,self.namespace)
 		for service in sub_service_list:
 			self.get_logger().info(f"service type: {service[1]}")
 			if service[1][0] not in self.service_ignore:

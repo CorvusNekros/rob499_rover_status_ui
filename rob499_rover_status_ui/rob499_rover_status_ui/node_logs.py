@@ -90,7 +90,7 @@ class NodeLogs(Node):
 			self.pub.publish(msg)
 
 	#The service callback will start/stop the node from sending logs:
-	def serv_callback(self,request,response):
+	def serv_callback(self, request, response):
 		#Log the request.
 		self.get_logger().info(f"Got request for log filtering: {request.enable}, at {request.hz}hz, of {request.node}.")
 		
