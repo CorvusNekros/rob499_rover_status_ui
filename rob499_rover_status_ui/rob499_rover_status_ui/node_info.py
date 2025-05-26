@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-# service that returns info about a node
+# service that returns info about a selected node
 #
 # node_info.py
 #
@@ -39,10 +39,11 @@ class NodeInfoService(Node):
 	# This callback will be called every time that the service is called.
 	def callback(self, request, response):
 		
-		#Resquested nodename and namespace:
+		#Requested nodename and namespace:
 		self.nodename = request.node
-		self.namespace = "/" # request.namespace
+		self.namespace = request.namespace
 
+		# fills in response data with respective functions
 		response.pub_topics = self.get_pub_topics()
 		response.sub_topics = self.get_sub_topics()
 		response.services = self.get_services()
@@ -51,27 +52,26 @@ class NodeInfoService(Node):
 
 		return response
 
-	# I dont know if this works when multiple topics are published from one node, also i dont think the data type is correct for the response
-	#not even sure if this is working correctly at all
+	# returns a list of the topics being published by selected node
 	def get_pub_topics(self):
 		output_list = []
-		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,'/')
+		pub_topic_list = self.get_publisher_names_and_types_by_node(self.nodename,'self.namespace')
 		for topic in pub_topic_list:
 			if topic[0] not in self.pub_ignore:
 				output_list.append(topic[0])
 		return output_list
-
+	# returns a list of the topics being subscribed to by selected node
 	def get_sub_topics(self):
 		output_list = []
-		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,'/')
+		sub_topic_list = self.get_subscriber_names_and_types_by_node(self.nodename,'self.namespace')
 		for topic in sub_topic_list:
 			if topic[0] not in self.sub_ignore:
 				output_list.append(topic[0])
 		return output_list
-		
+	# returns a list of the service server topics for selected node
 	def get_services(self):
 		output_list = []
-		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,'/')
+		sub_service_list = self.get_service_names_and_types_by_node(self.nodename,'self.namespace')
 		for service in sub_service_list:
 			self.get_logger().info(f"service type: {service[1]}")
 			if service[1][0] not in self.service_ignore:
