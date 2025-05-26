@@ -20,7 +20,7 @@ from rclpy.node import Node
 from rob499_rover_status_ui_interfaces.msg import NodesTopics
 
 # Our custom services
-from rob499_rover_status_ui_interfaces.srv import NodeInfo
+from rob499_rover_status_ui_interfaces.srv import NodeInfo, FilteredLog
 from rob499_rover_status_ui_interfaces.srv import LatencySize
 
 
@@ -34,6 +34,46 @@ class Integrator(Node):
 		self.node_topic_status = self.create_subscription(NodesTopics, 'nodetopiclisten', self.node_topic_callback, 10)
 
 		#Subscribe to both /nodetopiclisten and /log_filt
+
+		# Set up NodeInfo service client with a type and a service name.
+		self.node_info_client = self.create_client(NodeInfo, 'node_info')
+		
+		# Set up log_filt service client with a type and a service name.
+		self.log_filt_client = self.create_client(FilteredLog,'log_filt')
+
+	def node_info_request(self):
+		# Build a request.  Request types now are attributes of the main type, and are
+		# retrieved with Request().  Fill in the fields once we have it.
+		request = NodeInfo.Request()
+
+
+
+		#request.node = 
+		#request.namespace = 
+
+
+
+		# Service calls are now aynchronous by default.  We're going to store the result
+		# of the call in an instance variable.
+		self.node_info_response = self.node_info_client.call_async(request)
+		
+		
+	def log_filt_request(self):
+		# Build a request.  Request types now are attributes of the main type, and are
+		# retrieved with Request().  Fill in the fields once we have it.
+		request = FilteredLog.Request()
+
+
+		#request.enable = 
+		#request.hz = 
+		#request.node =
+
+
+
+		# Service calls are now aynchronous by default.  We're going to store the result
+		# of the call in an instance variable.
+		self.log_filt_response = self.log_filt_client.call_async(request)
+
 
 	# This callback will be called every time that the nodetopiclisten topic is published to.
 	# Just updates the class lists:
