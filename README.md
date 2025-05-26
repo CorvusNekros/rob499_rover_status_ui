@@ -3,19 +3,19 @@
 
 Instructions:
 
-Once packages have been built and sourced, the Status UI tool info nodes can be run with:
+Required imports:  
 
->ros2 launch rob499_rover_status_ui rover_ui.xml
+Once packages have been built and sourced, the Status UI tool info nodes and demo nodes can be run with:  
+
+>ros2 launch rob499_rover_status_ui rover_ui.py  
 
 
-In another terminal to run the actual UI run:
+In another terminal to run the actual UI run:  
 
 >ros2 run rob499_rover_status_ui integrator --ros-args --disable-stdout-logs  
 
 
-We have included one of our previous homework assignments to view with the UI, it can be launched with:
 
->HW LAUNCH COMMAND GOES HERE, ALSO INCLUDE THE HOMEWORK ASSIGNMENT
 
 
 How to select node for detailed view:  
