@@ -32,7 +32,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-
+find_package(std_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
@@ -40,9 +40,12 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NodesTopics.msg"
   "msg/FilteredLog.msg"
+  "msg/MoveItLogs.msg"
   "srv/LatencySize.srv"
   "srv/NodeInfo.srv"
   "srv/NodeLog.srv"
+
+  DEPENDENCIES std_msgs
 )
 ament_package()
 

@@ -41,7 +41,7 @@ class NodeInfoService(Node):
 		
 		#Requested nodename and namespace:
 		self.nodename = request.node
-		self.namespace = '/' #request.namespace
+		self.namespace = '/' #request.nodenamespace
 
 		# fills in response data with respective functions
 		response.pub_topics = self.get_pub_topics()

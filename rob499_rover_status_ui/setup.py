@@ -37,7 +37,9 @@ setup(
             'node_info = rob499_rover_status_ui.node_info:main',
 			'node_log = rob499_rover_status_ui.node_logs:main',
             'integrator = rob499_rover_status_ui.integrator:main',
-       
+
+            'moveit_logger = rob499_rover_status_ui.moveit_logger:main',
+            
 			'demo_oscope = rob499_rover_status_ui.DEMO_oscope:normal_wave',
 			'demo_limiter = rob499_rover_status_ui.DEMO_limiter:limit',
 	   ],
