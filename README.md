@@ -11,7 +11,7 @@ Midterm Checkin Grading Instructions:
 
 4. To test the midterm checkin functionality. Launch the following in ros:
 
-> ros2 launch rob499_rover_status_ui Demo_rover_ui.launch.py
+> ros2 launch rob499_rover_status_ui DEMO_rover_ui.launch.py
 
 In another terminal to run the actual UI run:  
 
