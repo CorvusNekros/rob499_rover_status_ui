@@ -44,6 +44,8 @@ class MoveItLogger(Node):
 		# Create the status subscriber.
 		self.statussub = self.create_subscription(Int8, 'servo_node/status', self.status_callback, 10)
 
+		#initialize status so that we dont publish a lot of msgs/sec
+		self.published_status = []
 
 	# This callback will be called whenever we receive a new message on the topic.
 	def joint_state_callback(self, msg):
@@ -55,6 +57,7 @@ class MoveItLogger(Node):
 		self.effort = msg.effort
 
 	def status_callback(self,msg):
+	
 		# Make an MoveItLogs custom message
 		new_msg = MoveItLogs()
 
@@ -83,15 +86,16 @@ class MoveItLogger(Node):
 		new_msg.position = self.position
 		new_msg.velocity = self.velocity
 		new_msg.effort = self.effort
-		
+		#only publish approx every second or if status changes
+		if (msg.header.stamp.sec > (self.header.stamp.sec+1)) or (self.published_status != new_msg.status):
+			self.published_status = new_msg.status
+			#publish our message
+			self.pub.publish(new_msg)
 
-		#publish our message
-		self.pub.publish(new_msg)
-
-		# Log that we published something.  In ROS2, loggers are associated with nodes, and
-		# the idiom is to use the get_logger() call to get the logger.  This has functions
-		# for each of the logging levels.
-		self.get_logger().info(f'Published {new_msg}')
+			# Log that we published something.  In ROS2, loggers are associated with nodes, and
+			# the idiom is to use the get_logger() call to get the logger.  This has functions
+			# for each of the logging levels.
+			self.get_logger().info(f'Published {new_msg}')
 
 # This is a entry point.	
 def main(args=None):
