@@ -117,6 +117,33 @@ class Integrator(Node):
 		# Calculating latency
 		self.node_latency = current_time - msg.stamp.nanosec
 
+	def moveit_logger_callback(self,msg):
+		
+		#Quick Logging message:
+		self.get_logger().info('Recieved MoveIt log message')
+		
+		#https://moveit.picknik.ai/humble/api/html/status__codes_8h.html
+		#reference for what status codes mean
+		# dictionary of what msg codes mean
+		status_mapping = {
+		-1:'INVALID',
+		0:'NO_WARNING',
+		1:'DECELERATE_FOR_APPROACHING_SINGULARITY',
+		2:'HALT_FOR_SINGULARITY',
+  		3:'DECELERATE_FOR_COLLISION',
+		4:'HALT_FOR_COLLISION',
+		5:'JOINT_BOUND',
+		6:'DECELERATE_FOR_LEAVING_SINGULARITY' 
+		}
+	
+		#Save the most recent data we get from our callback	
+		self.moveit_header = msg.header
+		self.moveit_name = msg.name
+		self.moveit_position = msg.position
+		self.moveit_velocity = msg.velocity
+		self.moveit_effort = msg.effort
+		self.moveit_status = status_mapping[msg.status]
+		
 	#If we need to update the selected node to introspect, do two service calls:
 	#TODO: Is there a clean non-blocking way to do this better, or should we not care...
 	def update_node_selection(self):
@@ -164,7 +191,21 @@ class Integrator(Node):
 			table.add_row(str(node),str(status))
 		
 		return table
+	
+	# Creates a table of MoveIt Logger info
+	# TODO make sure table has all desired info + proper format and integrates properly with terminal UI 
+	def generate_moveit_logger_table(self):
 
+		# TODO make sure this actually creates the table how I want 
+		#Generate the table headers:
+		table = Table(title="MoveIt Logs")
+		table.add_row("Joint Names", *self.moveit_name)
+		table.add_row("Positions", *self.moveit_position)
+		table.add_row("Velocities", *self.moveit_velocity)
+		table.add_row("Efforts", *self.moveit_effort)
+		table.add_row("Status", self.moveit_status)
+		
+		return table
 	#Creates a table of node info: pubs/subs/params/services:
 	def generate_node_info_table(self):
 		#Layout each method as a row, unsure what this will do since they're diff. lengths
@@ -203,9 +244,10 @@ class Integrator(Node):
 		status_table = self.generate_node_status_table()
 		info_table = self.generate_node_info_table()
 		log_table = self.generate_node_log_table()
-
+		moveit_table = self.generate_moveit_logger_table()
+		
 		grid = Table(box=None)
-		grid.add_row(status_table,info_table,log_table)
+		grid.add_row(status_table,info_table,log_table,moveit_table)
 
 		grid.show_header = False
 		grid.show_lines = False
