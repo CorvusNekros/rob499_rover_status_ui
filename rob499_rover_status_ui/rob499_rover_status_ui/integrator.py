@@ -101,6 +101,9 @@ class Integrator(Node):
 
 	#This callback is called every time a new node_log message is published. 
 	def node_log_callback(self, msg):
+		# Sets current time to use to calculate node latency using log stamp later
+		current_time = self.get_clock().now().nanoseconds
+		
 		#Quick Logging message:
 		self.get_logger().info('Recieved Node log message')
 
@@ -109,6 +112,10 @@ class Integrator(Node):
 		self.log_name = msg.name
 		self.log_level = msg.level
 		self.log_msg = msg.msg
+
+		#TODO probably nicer update this to average the latency across last 5-10 values or smth instead of raw
+		# Calculating latency
+		self.node_latency = current_time - msg.stamp.nanosec
 
 	#If we need to update the selected node to introspect, do two service calls:
 	#TODO: Is there a clean non-blocking way to do this better, or should we not care...
@@ -185,6 +192,7 @@ class Integrator(Node):
 		table.add_row('time', f'{self.log_stamp.sec}.{self.log_stamp.nanosec}')
 		table.add_row("level",levels.get(self.log_level))
 		table.add_row('msg',self.log_msg)
+		table.add_row('latency',self.node_latency)
 		
 		table.show_header = False
 		table.show_lines = True
