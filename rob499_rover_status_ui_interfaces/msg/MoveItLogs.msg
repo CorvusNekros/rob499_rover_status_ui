@@ -4,4 +4,4 @@ string[] name # Each joint is uniquely identified by its name
 float64[] position
 float64[] velocity
 float64[] effort
-string status #not directly associated with info in header but time stamp is possibly useful and close enough hopefully if anyone cares
+int8 status #not directly associated with info in header but time stamp is possibly useful and close enough hopefully if anyone cares

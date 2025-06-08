@@ -74,25 +74,14 @@ class MoveItLogger(Node):
 		# Make an MoveItLogs custom message
 		new_msg = MoveItLogs()
 
-		#https://moveit.picknik.ai/humble/api/html/status__codes_8h.html
-		#reference for what status codes mean
-
-		#dictionary for the int8 status codes we receive
-		#converting them here instead of using moveit function so that I don't need to install more things on my laptop + is simple
-		status_mapping = {
-		-1:'INVALID',
-		0:'NO_WARNING',
-		1:'DECELERATE_FOR_APPROACHING_SINGULARITY',
-		2:'HALT_FOR_SINGULARITY',
-  		3:'DECELERATE_FOR_COLLISION',
-		4:'HALT_FOR_COLLISION',
-		5:'JOINT_BOUND',
-		6:'DECELERATE_FOR_LEAVING_SINGULARITY' 
-		}
-
 		# stores relevant status string in new msg
+<<<<<<< HEAD
 		new_msg.status = status_mapping[msg.data]
 		
+=======
+		new_msg.status = msg.data
+
+>>>>>>> 3042c7638d8efdf7ec5d6cf29a86bbe8179706a5
 		# fills in info from states
 		new_msg.header = self.header
 		new_msg.name = self.name
