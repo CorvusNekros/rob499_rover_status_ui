@@ -21,6 +21,8 @@ from sensor_msgs.msg import JointState
 
 from std_msgs.msg import Int8
 
+from std_msgs.msg import Header
+
 # type of what we are publishing
 from rob499_rover_status_ui_interfaces.msg import MoveItLogs
 
@@ -44,13 +46,24 @@ class MoveItLogger(Node):
 		# Create the status subscriber.
 		self.statussub = self.create_subscription(Int8, 'servo_node/status', self.status_callback, 10)
 
+		self.header = Header()
+
 		#initialize status so that we dont publish a lot of msgs/sec
 		self.published_status = []
 
+		self.name = []
+		self.position = []
+		self.velocity = []
+		self.effort	= []
+
+		#initialized as 0
+		self.prev_pub_sec = 0
+		self.joint_time = 0
 	# This callback will be called whenever we receive a new message on the topic.
 	def joint_state_callback(self, msg):
 		# puts data inside of self. variables
 		self.header = msg.header
+		self.joint_time = msg.header.stamp.sec
 		self.name = msg.name
 		self.position = msg.position
 		self.velocity = msg.velocity
@@ -79,7 +92,7 @@ class MoveItLogger(Node):
 
 		# stores relevant status string in new msg
 		new_msg.status = status_mapping[msg.data]
-
+		
 		# fills in info from states
 		new_msg.header = self.header
 		new_msg.name = self.name
@@ -87,8 +100,13 @@ class MoveItLogger(Node):
 		new_msg.velocity = self.velocity
 		new_msg.effort = self.effort
 		#only publish approx every second or if status changes
-		if (msg.header.stamp.sec > (self.header.stamp.sec+1)) or (self.published_status != new_msg.status):
+		time = self.joint_time
+
+
+		if ((self.prev_pub_sec+1) < (time)) or (self.published_status != new_msg.status):
+			
 			self.published_status = new_msg.status
+			self.prev_pub_sec = time
 			#publish our message
 			self.pub.publish(new_msg)
 
