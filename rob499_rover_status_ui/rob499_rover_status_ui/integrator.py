@@ -124,8 +124,8 @@ class Integrator(Node):
 		self.log_msg = msg.msg
 
 		#TODO probably nicer update this to average the latency across last 5-10 values or smth instead of raw
-		# Calculating latency
-		self.node_latency = current_time - msg.stamp.nanosec
+		# Calculating latency (in seconds)
+		self.node_latency = (current_time - msg.stamp.sec*10**9 - msg.stamp.nanosec)/(1*10**9)
 
 	def moveit_logger_callback(self,msg):
 		
@@ -251,7 +251,7 @@ class Integrator(Node):
 		table.add_row('time', f'{self.log_stamp.sec}.{self.log_stamp.nanosec}')
 		table.add_row("level",levels.get(self.log_level))
 		table.add_row('msg',self.log_msg)
-		table.add_row('latency',self.node_latency)
+		table.add_row('latency',str(self.node_latency))
 		
 		table.show_header = False
 		table.show_lines = True
