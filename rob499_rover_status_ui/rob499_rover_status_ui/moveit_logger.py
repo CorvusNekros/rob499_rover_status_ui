@@ -75,13 +75,9 @@ class MoveItLogger(Node):
 		new_msg = MoveItLogs()
 
 		# stores relevant status string in new msg
-<<<<<<< HEAD
-		new_msg.status = status_mapping[msg.data]
-		
-=======
-		new_msg.status = msg.data
 
->>>>>>> 3042c7638d8efdf7ec5d6cf29a86bbe8179706a5
+		new_msg.status = msg.data
+		
 		# fills in info from states
 		new_msg.header = self.header
 		new_msg.name = self.name

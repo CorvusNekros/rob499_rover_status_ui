@@ -13,9 +13,10 @@
 import rclpy
 from rclpy.node import Node
 
-# We're subscribed to NodesTopics and FilteredLog custom messages
+# We're subscribed to MoveItLogs, NodesTopics and FilteredLog custom messages
 from rob499_rover_status_ui_interfaces.msg import NodesTopics
 from rob499_rover_status_ui_interfaces.msg import FilteredLog
+from rob499_rover_status_ui_interfaces.msg import MoveItLogs
 
 # Our custom services
 from rob499_rover_status_ui_interfaces.srv import NodeInfo
@@ -41,10 +42,10 @@ class Integrator(Node):
 		self.node_select_needs_updating = False
 
 		# Create the subscribers
-		#Subscribe to both /nodetopiclisten and /log_filt
+		#Subscribe to /moveit_logger, /nodetopiclisten and /log_filt
 		self.node_topic_status = self.create_subscription(NodesTopics, 'nodetopiclisten', self.node_topic_callback, 10)
 		self.node_logs = self.create_subscription(FilteredLog, 'log_filt', self.node_log_callback, 10)
-
+		self.moveit_logs = self.create_subscription(MoveItLogs, 'moveit_logs',self.moveit_logger_callback,10)
 		#We have three main data sets to store/display from the subscribed messages:
 		#First is the Node and Topic lists:
 		self.topic_names = []
@@ -56,12 +57,21 @@ class Integrator(Node):
 		self.log_name = ""
 		self.log_level = 0
 		self.log_msg = ""
-		
+		self.node_latency = ""
+
 		#Third is our Node Topics/Services/Params:
 		self.node_pubs = []
 		self.node_subs = []
 		self.node_params = []
 		self.node_services = []
+
+		#Fourth is our MoveIt data
+		self.moveit_header = []
+		self.moveit_name = []
+		self.moveit_position = []
+		self.moveit_velocity = []
+		self.moveit_effort = []
+		self.moveit_status = []
 
 		#Setup the service clients
 		#We can select a node for log info, and get a list of a nodes pub/subbed topics, paramters, services 
@@ -199,11 +209,19 @@ class Integrator(Node):
 		# TODO make sure this actually creates the table how I want 
 		#Generate the table headers:
 		table = Table(title="MoveIt Logs")
-		table.add_row("Joint Names", *self.moveit_name)
-		table.add_row("Positions", *self.moveit_position)
-		table.add_row("Velocities", *self.moveit_velocity)
-		table.add_row("Efforts", *self.moveit_effort)
-		table.add_row("Status", self.moveit_status)
+		table.add_column("Joint Name")
+		table.add_column("Position")
+		table.add_column("Velocity")
+		table.add_column("Effort")
+
+
+		for name, position, velo, effort in zip(self.moveit_name,self.moveit_position, self.moveit_velocity, self.moveit_effort):
+			table.add_row(str(name),str(position),str(velo),str(effort))
+
+		table.add_row("Status", str(self.moveit_status))
+		
+		
+		table.show_lines = True
 		
 		return table
 	#Creates a table of node info: pubs/subs/params/services:

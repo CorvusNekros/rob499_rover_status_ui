@@ -25,6 +25,13 @@ def generate_launch_description():
               "--ros-args",
               "--disable-stdout-logs"]
         ),
+		Node(
+			package='rob499_rover_status_ui',
+            executable='moveit_logger',
+            arguments=[
+              "--ros-args",
+              "--disable-stdout-logs"]
+        ),
         Node(
             package ='rob499_rover_status_ui',
 			executable='demo_oscope',
