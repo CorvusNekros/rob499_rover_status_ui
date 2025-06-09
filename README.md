@@ -2,6 +2,7 @@
 
 This repository contains a set of nodes designed to general & specific monitoring of ROS2 systems on the DAM Robotics Rover teams' robot. It was to fulfill the final assignment of ROB499 by Wyatt Boer and Osian Leahy.
 
+This project works with ROS2 humble, and probably works with jazzy
 
 # Functionality of Rover Status Node:
 
