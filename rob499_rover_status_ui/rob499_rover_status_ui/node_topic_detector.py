@@ -19,11 +19,11 @@ TODO: make sure custom message is set up in dependencies
  see: get_node_list() for root of problem
 '''
 
-class ListenTest(Node):
+class NodeTopicDetector(Node):
 	def __init__(self):
 		# Initialize the parent class, giving it a name.  The idiom is to use the
 		# super() class.
-		super().__init__('listener')
+		super().__init__('node_topic_detector')
 
 		# Create a publisher, and assign it to a member variable.T
 		# The call takes a type, topic name, and queue size.
@@ -106,11 +106,11 @@ def main(args=None):
 	rclpy.init(args=args)
 
 	# Make a node class.
-	listen = ListenTest()
+	detect = NodeTopicDetector()
 
 	# The spin() call gives control over to ROS2, and it now takes a Node-derived
 	# class as a parameter.
-	rclpy.spin(listen)
+	rclpy.spin(detect)
 
 	# Make sure we shutdown everything cleanly.
 	rclpy.shutdown()
