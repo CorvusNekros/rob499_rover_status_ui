@@ -42,7 +42,7 @@ setup(
             
 			'drivetrain_telemetry = rob499_rover_status_ui.odrive_telemetry:drivetrain_telem',
 			'arm_telemetry = rob499_rover_status_ui.odrive_telemetry:arm_telem',
-			'drive_slip = rob499_rover_status_ui.drivetrain_slip_detection:main',
+			'drive_slip = rob499_rover_status_ui.drive_slip_detection:main',
 
 			'demo_oscope = rob499_rover_status_ui.DEMO_oscope:normal_wave',
 			'demo_limiter = rob499_rover_status_ui.DEMO_limiter:limit',

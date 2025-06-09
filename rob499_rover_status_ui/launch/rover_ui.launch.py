@@ -7,23 +7,26 @@ def generate_launch_description():
 		Node(
 			package='rob499_rover_status_ui',
             executable='node_info',
-            arguments=[
-              "--ros-args",
-              "--disable-stdout-logs"]
         ),
 		Node(
 			package='rob499_rover_status_ui',
             executable='node_log',
-            arguments=[
-              "--ros-args",
-              "--disable-stdout-logs"]
         ),
 		Node(
 			package='rob499_rover_status_ui',
-            executable='node_topic_detector',
-            arguments=[
-              "--ros-args",
-              "--disable-stdout-logs"]
+			executable='node_topic_detector'
+            ),
+		Node(
+			package='rob499_rover_status_ui',
+            executable='moveit_logger',
         ),
-
+		Node(
+			package='rob499_rover_status_ui',
+            executable='drivetrain_telemetry',
+        ),
+		Node(
+			package='rob499_rover_status_ui',
+            executable='drive_slip',
+        ),
+		
     ])

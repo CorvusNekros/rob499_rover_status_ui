@@ -13,6 +13,8 @@
 import rclpy
 from rclpy.node import Node
 
+import rcl_interfaces
+
 # We're subscribed to MoveItLogs, NodesTopics and FilteredLog custom messages
 from rob499_rover_status_ui_interfaces.msg import NodesTopics
 from rob499_rover_status_ui_interfaces.msg import FilteredLog
@@ -27,7 +29,7 @@ from rob499_rover_status_ui_interfaces.srv import NodeLog
 
 #We're using parameters:
 from rclpy.parameter import parameter_value_to_python
-from rclpy.parameter_event_handler import ParameterEventHandler
+#from rclpy.parameter_event_handler import ParameterEventHandler #Doesn't exist in Humble :(
 
 #Import rich libraries for table generation:
 from rich.live import Live
@@ -107,12 +109,15 @@ class Integrator(Node):
 
 		#These service calls will be fed by node name/namespace parameters
 		# The controlling node (unity in the future) can update this parameter to change the node info/log data sent.
-		self.declare_parameter('node_select', '_NULL')
-		self.declare_parameter('namespace_select', '/')
-		self.declare_parameter('odrive_select','0')
+		self.node_select = 'integrator'
+		self.declare_parameter('node_select', self.node_select)
+		self.namespace_select = '/'
+		self.declare_parameter('namespace_select', self.namespace_select)
+		self.odrive_select = 0
+		self.declare_parameter('odrive_select', self.odrive_select)
 
 		#We're gonna use a parameter callback to handle downstream updates:
-		self.param_handler = ParameterEventHandler(self)
+		''' self.param_handler = ParameterEventHandler(self)
 		self.callback_handles.append(self.param_handler.add_parameter_callback(
 			parameter_name = 'node_select',
 			node_name = 'integrator',
@@ -129,7 +134,7 @@ class Integrator(Node):
 			parameter_name = 'odrive_select',
 			node_name = 'integrator',
 			callback = self.param_callback
-		))
+		)) '''
 
 		#Before exiting the init step, we want to know that the info/log select services are available, otherwise chaos:
 		while not (self.info_cli.wait_for_service(timeout_sec=1) or self.log_select_cli.wait_for_service(timeout_sec=1)):
@@ -246,12 +251,13 @@ class Integrator(Node):
 		self.node_services = info_response.services
 
 	#When the parameter changes, we should update the node selection downstream:
-	def param_callback(self, parameter):
+	'''def param_callback(self, parameter):
 		#Quick logging message:
 		self.get_logger().info(f'Parameter Changed: {parameter.name} = {parameter_value_to_python(parameter.value)}')
 
 		#Prepare to call update_node_selection() since our node of interest changed:
 		self.node_select_needs_updating = True
+	'''
 
 	#Creates a table of nodes and their dead/alive statuses
 	def generate_node_status_table(self):
@@ -327,10 +333,10 @@ class Integrator(Node):
 	def generate_odrive_overview_table(self):
 		
 		table = Table(title=f"ODrives on {self.bus}")
-		table.add_row('Node IDs',*self.id)
-		table.add_row('Motor Current',*self.iq_measured)
-		table.add_row('Motor Temp',self.t_motor)
-		table.add_row('Disarm Reason',self.disarm_reason)
+		table.add_row('Node IDs',*list(map(str,self.id)))
+		table.add_row('Motor Current',*list(map(str,self.iq_measured)))
+		table.add_row('Motor Temp',*list(map(str,self.t_motor)))
+		table.add_row('Disarm Reason',*list(map(str,self.disarm_reason)))
 
 		table.show_header = False
 		table.show_lines = True
@@ -341,7 +347,7 @@ class Integrator(Node):
 	def generate_odrive_specific_table(self):
 		
 		#Get the node id from the parameter, and find the corresponding idx 
-		node_id = self.get_parameter('odrive_select').get_parameter_value().int_value
+		node_id = self.get_parameter('odrive_select').get_parameter_value().integer_value
 		
 		#init the table:
 		table = Table(title=f'ODrive {node_id} on {self.bus}')
@@ -352,14 +358,14 @@ class Integrator(Node):
 			#Return an empty table if idx is not available
 			return table
 
-		table.add_row("Position", self.position[idx])
-		table.add_row("Velocity", self.velocity[idx])	
-		table.add_row("Motor Current", self.iq_measured[idx])
-		table.add_row("Motor Temp", self.t_motor[idx])
-		table.add_row("Bus Voltage", self.bus_voltage[idx])
-		table.add_row("Bus Current", self.bus_current[idx])
-		table.add_row("FET temp", self.t_fet[idx])
-		table.add_row("Disarm reason",self.disarm_reason[idx])
+		table.add_row("Position", str(self.position[idx]))
+		table.add_row("Velocity", str(self.velocity[idx]))
+		table.add_row("Motor Current", str(self.iq_measured[idx]))
+		table.add_row("Motor Temp", str(self.t_motor[idx]))
+		table.add_row("Bus Voltage", str(self.bus_voltage[idx]))
+		table.add_row("Bus Current", str(self.bus_current[idx]))
+		table.add_row("FET temp", str(self.t_fet[idx]))
+		table.add_row("Disarm reason",str(self.disarm_reason[idx]))
 
 		table.show_header = False
 		table.show_lines = True
@@ -371,8 +377,8 @@ class Integrator(Node):
 	
 		table = Table(title=f"Wheel Slip Status")
 
-		table.add_row("Wheels", *self.slip_names)
-		table.add_row("Slipping", *self.slipstate)
+		table.add_row("Wheels", *list(map(str,self.slip_names)))
+		table.add_row("Slipping", *list(map(str,self.slipstate)))
 
 		table.show_header = False
 		table.show_lines = True
@@ -410,6 +416,18 @@ def main(args=None):
 	with Live(integrate.generate_tables(), refresh_per_second=15) as live:
 
 		while rclpy.ok():
+			#Poll the parameters we care about since we're on ros2 humble :/
+			
+			new_node = integrate.get_parameter('node_select').get_parameter_value().string_value
+			new_namespace = integrate.get_parameter('namespace_select').get_parameter_value().string_value
+			
+			if (new_node != integrate.node_select):
+				integrate.node_select = new_node
+				integrate.node_select_needs_updating = True
+			if (new_namespace != integrate.namespace_select):
+				integrate.namespace_select = new_namespace
+				integrate.node_select_needs_updating = True
+
 			#Check if we need to update the node to introspect (runs the relevant service calls)
 			if integrate.node_select_needs_updating:
 				integrate.node_select_needs_updating = False

@@ -6,7 +6,7 @@ from rclpy.node import Node
 import numpy as np
 
 #Include the custom message definition:
-from rob499_rover_status_ui_interface.msg import ODriveStatus
+from rob499_rover_status_ui_interfaces.msg import ODriveStatus
 
 #Include the relevant canbus libraries:
 import struct #Used for handling byte arrays
