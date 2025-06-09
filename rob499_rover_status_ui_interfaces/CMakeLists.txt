@@ -41,6 +41,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/NodesTopics.msg"
   "msg/FilteredLog.msg"
   "msg/MoveItLogs.msg"
+  "msg/ODriveStatus.msg"
+  "msg/TractionStatus.msg"
   "srv/LatencySize.srv"
   "srv/NodeInfo.srv"
   "srv/NodeLog.srv"

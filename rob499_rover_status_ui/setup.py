@@ -40,6 +40,10 @@ setup(
 
             'moveit_logger = rob499_rover_status_ui.moveit_logger:main',
             
+			'drivetrain_telemetry = rob499_rover_status_ui.odrive_telemetry:drivetrain_telem',
+			'arm_telemetry = rob499_rover_status_ui.odrive_telemetry:arm_telem',
+			'drive_slip = rob499_rover_status_ui.drivetrain_slip_detection:main',
+
 			'demo_oscope = rob499_rover_status_ui.DEMO_oscope:normal_wave',
 			'demo_limiter = rob499_rover_status_ui.DEMO_limiter:limit',
 	   ],

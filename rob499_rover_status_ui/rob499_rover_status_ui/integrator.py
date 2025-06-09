@@ -17,6 +17,8 @@ from rclpy.node import Node
 from rob499_rover_status_ui_interfaces.msg import NodesTopics
 from rob499_rover_status_ui_interfaces.msg import FilteredLog
 from rob499_rover_status_ui_interfaces.msg import MoveItLogs
+from rob499_rover_status_ui_interfaces.msg import ODriveStatus
+from rob499_rover_status_ui_interfaces.msg import TractionStatus
 
 # Our custom services
 from rob499_rover_status_ui_interfaces.srv import NodeInfo
@@ -42,29 +44,33 @@ class Integrator(Node):
 		self.node_select_needs_updating = False
 
 		# Create the subscribers
-		#Subscribe to /moveit_logger, /nodetopiclisten and /log_filt
+		#Subscribe to /moveit_logger, /nodetopiclisten, /log_filt, /odrive_telem, /slip_status
 		self.node_topic_status = self.create_subscription(NodesTopics, 'nodetopiclisten', self.node_topic_callback, 10)
 		self.node_logs = self.create_subscription(FilteredLog, 'log_filt', self.node_log_callback, 10)
 		self.moveit_logs = self.create_subscription(MoveItLogs, 'moveit_logs',self.moveit_logger_callback,10)
-		#We have three main data sets to store/display from the subscribed messages:
+		self.odrive_status = self.create_subscription(ODriveStatus, 'odrive_telem', self.odrive_status_callback, 10)
+		self.slip_status = self.create_subscription(TractionStatus, 'slip_status', self.slip_callback, 10)
+
+		#We have Six main data sets to store/display from the subscribed messages:
 		#First is the Node and Topic lists:
 		self.topic_names = []
 		self.topic_statuses = []
 		self.node_names = []
 		self.node_statuses = []
+
 		#Second is the Node Logs:
 		self.log_stamp = self.get_clock().now().to_msg()
 		self.log_name = ""
 		self.log_level = 0
 		self.log_msg = ""
 		self.node_latency = ""
-
+		
 		#Third is our Node Topics/Services/Params:
 		self.node_pubs = []
 		self.node_subs = []
 		self.node_params = []
 		self.node_services = []
-
+		
 		#Fourth is our MoveIt data
 		self.moveit_header = []
 		self.moveit_name = []
@@ -72,6 +78,27 @@ class Integrator(Node):
 		self.moveit_velocity = []
 		self.moveit_effort = []
 		self.moveit_status = []
+
+		#Fifth is the ODrive Statuses:
+		self.odrive_timestamp = self.get_clock().now()
+		self.bus = ""
+
+		self.id = []
+		self.disarm_reason = []
+		self.t_fet = []
+		self.t_motor = []
+		self.velocity = []
+		self.position = []
+		self.iq_set = []
+		self.iq_measured = []
+		self.bus_voltage = []
+		self.bus_current = []
+
+		#Sixth is the Slip detection:
+		self.slip_timestamp = self.get_clock().now()
+		self.slip_id = []
+		self.slip_names = []
+		self.slipstate = []
 
 		#Setup the service clients
 		#We can select a node for log info, and get a list of a nodes pub/subbed topics, paramters, services 
@@ -82,14 +109,27 @@ class Integrator(Node):
 		# The controlling node (unity in the future) can update this parameter to change the node info/log data sent.
 		self.declare_parameter('node_select', '_NULL')
 		self.declare_parameter('namespace_select', '/')
+		self.declare_parameter('odrive_select','0')
 
 		#We're gonna use a parameter callback to handle downstream updates:
 		self.param_handler = ParameterEventHandler(self)
-		self.callback_handle = self.param_handler.add_parameter_callback(
+		self.callback_handles.append(self.param_handler.add_parameter_callback(
 			parameter_name = 'node_select',
 			node_name = 'integrator',
 			callback = self.param_callback
-		) #Should probably do this for the namespace too?
+		))
+		
+		self.callback_handles.append(self.param_handler.add_parameter_callback(
+			parameter_name = 'namespace_select',
+			node_name = 'integrator',
+			callback = self.param_callback
+		))
+		
+		self.callback_handles.append(self.param_handler.add_parameter_callback(
+			parameter_name = 'odrive_select',
+			node_name = 'integrator',
+			callback = self.param_callback
+		))
 
 		#Before exiting the init step, we want to know that the info/log select services are available, otherwise chaos:
 		while not (self.info_cli.wait_for_service(timeout_sec=1) or self.log_select_cli.wait_for_service(timeout_sec=1)):
@@ -153,7 +193,32 @@ class Integrator(Node):
 		self.moveit_velocity = msg.velocity
 		self.moveit_effort = msg.effort
 		self.moveit_status = status_mapping[msg.status]
-		
+	
+	def odrive_status_callback(self, msg):
+		#Unpack the msg:
+		#We will pare the data down in the generate table functions...
+
+		self.odrive_timestamp = msg.timestamp
+		self.bus = msg.bus
+
+		self.id = msg.id
+		self.disarm_reason = msg.disarm_reason
+		self.t_fet = msg.t_fet
+		self.t_motor = msg.t_motor
+		self.velocity = msg.velocity
+		self.position = msg.position
+		self.iq_set = msg.iq_set
+		self.iq_measured = msg.iq_measured
+		self.bus_voltage = msg.bus_voltage
+		self.bus_current = msg.bus_voltage
+	
+	def slip_callback(self, msg):
+		#Unpack the msg, pare the data down later.
+		self.slip_timestamp = msg.timestamp
+		self.slip_id = msg.id
+		self.slip_names = msg.names
+		self.slipstate = msg.slipstate
+
 	#If we need to update the selected node to introspect, do two service calls:
 	#TODO: Is there a clean non-blocking way to do this better, or should we not care...
 	def update_node_selection(self):
@@ -258,19 +323,79 @@ class Integrator(Node):
 
 		return table
 
+	#Gives an overview of all odrives on the selected can bus.
+	def generate_odrive_overview_table(self):
+		
+		table = Table(title=f"ODrives on {self.bus}")
+		table.add_row('Node IDs',*self.id)
+		table.add_row('Motor Current',*self.iq_measured)
+		table.add_row('Motor Temp',self.t_motor)
+		table.add_row('Disarm Reason',self.disarm_reason)
+
+		table.show_header = False
+		table.show_lines = True
+
+		return table
+
+	#Gives a detailed view of a specific selected Odrive
+	def generate_odrive_specific_table(self):
+		
+		#Get the node id from the parameter, and find the corresponding idx 
+		node_id = self.get_parameter('odrive_select').get_parameter_value().int_value
+		
+		#init the table:
+		table = Table(title=f'ODrive {node_id} on {self.bus}')
+
+		try:
+			idx = self.id.index(node_id)
+		except:
+			#Return an empty table if idx is not available
+			return table
+
+		table.add_row("Position", self.position[idx])
+		table.add_row("Velocity", self.velocity[idx])	
+		table.add_row("Motor Current", self.iq_measured[idx])
+		table.add_row("Motor Temp", self.t_motor[idx])
+		table.add_row("Bus Voltage", self.bus_voltage[idx])
+		table.add_row("Bus Current", self.bus_current[idx])
+		table.add_row("FET temp", self.t_fet[idx])
+		table.add_row("Disarm reason",self.disarm_reason[idx])
+
+		table.show_header = False
+		table.show_lines = True
+
+		return table		
+
+	#Give an overview of all six wheels and wether or not they are slipping:
+	def generate_slip_status_table(self):
+	
+		table = Table(title=f"Wheel Slip Status")
+
+		table.add_row("Wheels", *self.slip_names)
+		table.add_row("Slipping", *self.slipstate)
+
+		table.show_header = False
+		table.show_lines = True
+
+		return table
+
 	def generate_tables(self):
 		status_table = self.generate_node_status_table()
 		info_table = self.generate_node_info_table()
 		log_table = self.generate_node_log_table()
 		moveit_table = self.generate_moveit_logger_table()
-		
+		odrive_overview = self.generate_odrive_overview_table()
+		odrive_specific = self.generate_odrive_specific_table()
+		slip_table = self.generate_slip_status_table()
+
 		grid = Table(box=None)
 		grid.add_row(status_table,info_table,log_table,moveit_table)
+		grid.add_row(odrive_overview,odrive_specific)
+		grid.add_row(slip_table)
 
 		grid.show_header = False
 		grid.show_lines = False
 		grid.show_edge = False
-	
 
 		return grid
 
@@ -285,26 +410,18 @@ def main(args=None):
 	with Live(integrate.generate_tables(), refresh_per_second=15) as live:
 
 		while rclpy.ok():
-			#Check if we need to update the node to introspect
+			#Check if we need to update the node to introspect (runs the relevant service calls)
 			if integrate.node_select_needs_updating:
 				integrate.node_select_needs_updating = False
 				integrate.update_node_selection()
 		
+			#Generate and update the tables we want to see:
 			live.update(integrate.generate_tables())
+
 			#Spin once each loop iteration
 			rclpy.spin_once(integrate)
 
-	#TODO: While loop with table stuff here:
-		# We want 3 tables:
-		# - The first table displays a list of node statuses
-		# - The second table displays the selected node and it's topics
-		# - The Third table displays the most recent log info of a selected node
-
-	#Construct/Update tables:
-
+	#This never runs <3
 	rclpy.shutdown()
 
 
-# This is the entry point when we call the node directly.
-if __name__ == '__main__':
-	main()
