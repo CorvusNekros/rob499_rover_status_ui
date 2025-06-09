@@ -2,6 +2,14 @@
 
 This repository contains a set of nodes designed to general & specific monitoring of ROS2 systems on the DAM Robotics Rover teams' robot. It was to fulfill the final assignment of ROB499 by Wyatt Boer and Osian Leahy.
 
+
+# Functionality of Rover Status Node:
+
+Dynamically determine what nodes are available and track if any have crashed/errored out. It is able to listen in to any node, and see what the node is publishing/subscribing to, as well as associated services. There is a service such that you can introspect a node’s logs from the UI.  
+Additionally some handling of common motor driver data for the MoveIt stack, see motor status (error states, current, position, velocity, etc).  
+UI built into tables in the terminal relatively neatly for easier viewing, as opposed to the never ending scrolling of an unformatted terminal.  
+
+
 Midterm Checkin Grading Instructions:
 1. Clone the code from this repository and checkout the appropriate branch. A branch titled "midterm-checkin"has been created for the initial assignment.
 2. insure that the "rich" python package is installed. it is available from apt with the following:
