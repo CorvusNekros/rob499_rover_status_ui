@@ -1,23 +1,11 @@
 #!/usr/bin/env python3
 
-
-
-
 import rclpy
 from rclpy.node import Node
 from ros2node.api import get_node_names
 
-
 # We're going to publish a NodesTopics custom message
 from rob499_rover_status_ui_interfaces.msg import NodesTopics
-
-
-
-'''
-TODO: make sure custom message is set up in dependencies 
- Fix a minor bug where this node does not display itself as alive and instead shows  _ros2cli_dummy_to_show_node_list
- see: get_node_list() for root of problem
-'''
 
 class NodeTopicDetector(Node):
 	def __init__(self):

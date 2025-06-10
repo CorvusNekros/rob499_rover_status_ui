@@ -27,10 +27,7 @@ from std_msgs.msg import Header
 from rob499_rover_status_ui_interfaces.msg import MoveItLogs
 
 class MoveItLogger(Node):
-	'''
-	This node subscribes to a topic publishing Int64s, doubles each number if receives, and
-	# repubishes the result on an outbound topic.
-	'''
+	
 	def __init__(self):
 		# Initialize the parent class, giving it a name.  The idiom is to use the
 		# super() class.
